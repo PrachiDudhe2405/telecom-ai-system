@@ -185,7 +185,16 @@ def page_capacity_forecast() -> None:
         "at **80% of historical peak traffic** for the selected cell."
     )
 
-    data = load_capacity_data()
+    try:
+        data = load_capacity_data()
+    except Exception:
+        st.warning(
+            "Cell3 traffic data is not available in this deployment. "
+            "To run this page locally, add the `data/Cell3_Data/` CSV files "
+            "and relaunch with `streamlit run dashboard/app.py`."
+        )
+        return
+
     cell_ids = sorted(data["CellID"].unique().tolist())
 
     st.subheader("Cell Selection")
