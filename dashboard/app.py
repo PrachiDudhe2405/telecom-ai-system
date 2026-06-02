@@ -71,7 +71,7 @@ def _predict_complaint(model, raw_text: str) -> tuple[int, float]:
     cleaned = _clean_tweet(raw_text)
     prob = model.predict_proba([cleaned])[0][1]
     keyword_hit = bool(_COMPLAINT_PATTERNS.search(raw_text))
-    label = 1 if (prob >= 0.5 or keyword_hit) else 0
+    label = 1 if (prob >= 0.6 or keyword_hit) else 0
     return label, prob
 
 
