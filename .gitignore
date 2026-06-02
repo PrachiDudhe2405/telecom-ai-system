@@ -1,0 +1,31 @@
+# Virtual environment
+.venv/
+
+# Raw and large data files — too large for GitHub (2.9 GB)
+data/raw/
+data/Cell3_Data/
+
+# Keep processed outputs
+!data/processed/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Streamlit
+.streamlit/
+data/Cell2_Data/
+.jupyter/
