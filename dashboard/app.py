@@ -139,7 +139,7 @@ def page_complaint_detector() -> None:
     st.title("Complaint Detector")
     st.markdown(
         "Classify inbound customer tweets as complaints using a **TF-IDF + Logistic "
-        "Regression** pipeline trained with VADER sentiment-based labels."
+        "Regression** pipeline trained with RoBERTa + zero-shot labels."
     )
 
     st.subheader("Tweet Analysis")
@@ -165,7 +165,7 @@ def page_complaint_detector() -> None:
     st.subheader("Top 10 Complaint Indicators")
     st.markdown(
         "Words with the highest logistic regression coefficients for the complaint class, "
-        "learned from VADER-labeled training data."
+        "learned from RoBERTa + zero-shot labeled training data."
     )
     model = load_social_model()
     feature_names = model.named_steps["tfidf"].get_feature_names_out()

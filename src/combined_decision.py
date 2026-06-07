@@ -1,4 +1,5 @@
 from pathlib import Path
+import re
 
 import joblib
 import pandas as pd
@@ -8,12 +9,27 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 NETWORK_MODEL_FILE = BASE_DIR / "models" / "network_model.pkl"
 SOCIAL_MODEL_FILE = BASE_DIR / "models" / "social_model.pkl"
 
-network_model = joblib.load(NETWORK_MODEL_FILE)
-social_model = joblib.load(SOCIAL_MODEL_FILE)
+_network_model = None
+_social_model = None
+
+
+def _clean_text(text: str) -> str:
+    text = str(text).lower()
+    text = re.sub(r"@\w+", "", text)
+    text = re.sub(r"http\S+", "", text)
+    text = re.sub(r"[^\w\s]", "", text)
+    text = re.sub(r"\s+", " ", text)
+    return text.strip()
 
 
 def predict_priority(network_kpi_features: dict, customer_message: str) -> str:
     """Combine network and social predictions into one priority decision."""
+    global _network_model, _social_model
+    if _network_model is None:
+        _network_model = joblib.load(NETWORK_MODEL_FILE)
+    if _social_model is None:
+        _social_model = joblib.load(SOCIAL_MODEL_FILE)
+
     network_df = pd.DataFrame([network_kpi_features]).copy()
 
     # The saved network model expects a wider feature set than the caller passes,
@@ -28,11 +44,12 @@ def predict_priority(network_kpi_features: dict, customer_message: str) -> str:
     network_df["normalized_deviation"] = network_df["deviation_from_mean"] / (
         network_df["rolling_std_5"].replace(0, 1)
     )
-    network_df = network_df.reindex(columns=network_model.feature_names_in_)
-    network_prediction = int(network_model.predict(network_df)[0])
+    network_df = network_df.reindex(columns=_network_model.feature_names_in_)
+    network_prob = _network_model.predict_proba(network_df)[0][1]
+    network_prediction = int(network_prob >= 0.47)
 
-    cleaned_text = customer_message.lower().strip()
-    social_prediction = int(social_model.predict([cleaned_text])[0])
+    cleaned_text = _clean_text(customer_message)
+    social_prediction = int(_social_model.predict([cleaned_text])[0])
 
     if network_prediction == 1 and social_prediction == 1:
         return "High Priority Telecom Issue"

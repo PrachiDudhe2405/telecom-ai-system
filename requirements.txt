@@ -7,4 +7,6 @@ seaborn
 joblib
 streamlit
 jupyter
-vaderSentiment
+transformers
+torch
+tqdm
