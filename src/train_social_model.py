@@ -123,16 +123,17 @@ def create_combined_labels(df: pd.DataFrame, skip_cache: bool = False) -> pd.Dat
         df["roberta_negative"] = roberta_scores
         df["zero_shot_complaint"] = zero_shot_scores
 
-        CACHE_FILE.parent.mkdir(parents=True, exist_ok=True)
-        cache_df = pd.DataFrame(
-            {
-                "roberta_negative": roberta_scores,
-                "zero_shot_complaint": zero_shot_scores,
-            },
-            index=df.index,
-        )
-        cache_df.to_csv(CACHE_FILE)
-        print(f"Scores cached to {CACHE_FILE}")
+        if not skip_cache:
+            CACHE_FILE.parent.mkdir(parents=True, exist_ok=True)
+            cache_df = pd.DataFrame(
+                {
+                    "roberta_negative": roberta_scores,
+                    "zero_shot_complaint": zero_shot_scores,
+                },
+                index=df.index,
+            )
+            cache_df.to_csv(CACHE_FILE)
+            print(f"Scores cached to {CACHE_FILE}")
 
     # OR branch catches factual complaints with no strong negative emotion
     # (e.g. "verizon is down, when's the fix?") where RoBERTa scores neutral

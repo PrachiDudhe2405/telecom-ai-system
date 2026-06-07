@@ -9,6 +9,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 NETWORK_MODEL_FILE = BASE_DIR / "models" / "network_model.pkl"
 SOCIAL_MODEL_FILE = BASE_DIR / "models" / "social_model.pkl"
 
+NETWORK_THRESHOLD = 0.47
+
 _network_model = None
 _social_model = None
 
@@ -46,7 +48,7 @@ def predict_priority(network_kpi_features: dict, customer_message: str) -> str:
     )
     network_df = network_df.reindex(columns=_network_model.feature_names_in_)
     network_prob = _network_model.predict_proba(network_df)[0][1]
-    network_prediction = int(network_prob >= 0.47)
+    network_prediction = int(network_prob >= NETWORK_THRESHOLD)
 
     cleaned_text = _clean_text(customer_message)
     social_prediction = int(_social_model.predict([cleaned_text])[0])
@@ -63,44 +65,44 @@ def predict_priority(network_kpi_features: dict, customer_message: str) -> str:
 def main() -> None:
     test_cases = [
         {
-            "name": "Case 1: Network issue and complaint",
+            "name": "Case 1: Network incident + complaint",
             "network_kpi_features": {
-                "kpi_value": -5.0,
-                "rolling_mean_5": -2.0,
-                "rolling_std_5": 1.0,
-                "kpi_diff": -5.0,
+                "kpi_value": 850.0,
+                "rolling_mean_5": 820.0,
+                "rolling_std_5": 45.0,
+                "kpi_diff": -30.0,
             },
-            "customer_message": "My internet is not working and calls keep dropping",
+            "customer_message": "my internet has been down for hours this is terrible",
         },
         {
-            "name": "Case 2: Network issue only",
+            "name": "Case 2: Network incident only",
             "network_kpi_features": {
-                "kpi_value": -5.0,
-                "rolling_mean_5": -2.0,
-                "rolling_std_5": 1.0,
-                "kpi_diff": -5.0,
+                "kpi_value": 850.0,
+                "rolling_mean_5": 820.0,
+                "rolling_std_5": 45.0,
+                "kpi_diff": -30.0,
             },
-            "customer_message": "Thanks for the update",
+            "customer_message": "thanks for the update",
         },
         {
             "name": "Case 3: Complaint only",
             "network_kpi_features": {
-                "kpi_value": -5.0,
-                "rolling_mean_5": -5.0,
-                "rolling_std_5": 0.0,
-                "kpi_diff": -5.0,
+                "kpi_value": 450.0,
+                "rolling_mean_5": 460.0,
+                "rolling_std_5": 8.0,
+                "kpi_diff": 5.0,
             },
-            "customer_message": "This service is the worst and I need help fixing it",
+            "customer_message": "this service is the worst I need help fixing it",
         },
         {
-            "name": "Case 4: No major issue",
+            "name": "Case 4: No issue",
             "network_kpi_features": {
-                "kpi_value": -5.0,
-                "rolling_mean_5": -5.0,
-                "rolling_std_5": 0.0,
-                "kpi_diff": -5.0,
+                "kpi_value": 450.0,
+                "rolling_mean_5": 460.0,
+                "rolling_std_5": 8.0,
+                "kpi_diff": 5.0,
             },
-            "customer_message": "Thank you for checking on my account",
+            "customer_message": "thank you for your help today",
         },
     ]
 
